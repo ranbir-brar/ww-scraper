@@ -1,37 +1,91 @@
+import Select from "react-select";
+
+const options = [
+  { value: "deadline", label: "Deadline (Soonest)" },
+  { value: "salary", label: "Salary (Highest)" },
+  { value: "competition", label: "Competition (Lowest)" },
+  { value: "alphabetical", label: "Alphabetical (A-Z)" },
+];
+
+const customStyles = {
+  control: (base, state) => ({
+    ...base,
+    backgroundColor: "var(--bg-surface)",
+    borderColor: state.isFocused ? "var(--color-primary)" : "var(--border-dim)",
+    borderRadius: "12px",
+    padding: "4px 8px",
+    minWidth: "200px",
+    boxShadow: state.isFocused ? "0 0 0 1px var(--color-primary)" : "none",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      borderColor: "var(--color-primary)",
+    },
+  }),
+  menu: (base) => ({
+    ...base,
+    backgroundColor: "var(--bg-surface)",
+    border: "1px solid var(--border-dim)",
+    borderRadius: "12px",
+    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+    overflow: "hidden",
+    zIndex: 100,
+  }),
+  menuList: (base) => ({
+    ...base,
+    padding: "8px",
+  }),
+  option: (base, state) => ({
+    ...base,
+    backgroundColor: state.isSelected
+      ? "var(--color-primary)"
+      : state.isFocused
+      ? "var(--bg-surface-hover)"
+      : "transparent",
+    color: state.isSelected ? "var(--text-inverse)" : "var(--text-main)",
+    borderRadius: "8px",
+    padding: "10px 14px",
+    cursor: "pointer",
+    transition: "all 0.15s ease",
+    "&:active": {
+      backgroundColor: "var(--color-primary)",
+      color: "var(--text-inverse)",
+    },
+  }),
+  singleValue: (base) => ({
+    ...base,
+    color: "var(--text-main)",
+    fontWeight: 500,
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: "var(--text-muted)",
+  }),
+  dropdownIndicator: (base, state) => ({
+    ...base,
+    color: state.isFocused ? "var(--color-primary)" : "var(--text-muted)",
+    transition: "all 0.3s ease",
+    transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "rotate(0)",
+    "&:hover": {
+      color: "var(--color-primary)",
+    },
+  }),
+  indicatorSeparator: () => ({
+    display: "none",
+  }),
+};
+
 export default function SortDropdown({ value, onChange }) {
-  const options = [
-    { value: "deadline", label: "Deadline (Soonest)" },
-    { value: "salary", label: "Salary (Highest)" },
-    { value: "competition", label: "Competition (Lowest)" },
-    { value: "alphabetical", label: "Alphabetical (A-Z)" },
-  ];
+  const selectedOption = options.find((opt) => opt.value === value) || null;
 
   return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="appearance-none bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg px-4 py-2.5 pr-10 text-sm text-[var(--color-text-primary)] cursor-pointer hover:border-[var(--color-accent-blue)] focus:outline-none focus:border-[var(--color-accent-blue)] transition-colors"
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      <svg
-        className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M19 9l-7 7-7-7"
-        />
-      </svg>
-    </div>
+    <Select
+      value={selectedOption}
+      onChange={(selected) => onChange(selected?.value || "deadline")}
+      options={options}
+      styles={customStyles}
+      isSearchable={false}
+      menuPlacement="auto"
+    />
   );
 }

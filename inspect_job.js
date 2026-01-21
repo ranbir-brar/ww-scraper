@@ -1,37 +1,43 @@
 const fs = require("fs");
-const path = require("path");
 
-const RAW_DATA_PATH = path.join(__dirname, "jobs.json");
+const jobId = 448768;
 
 try {
-  const jobs = JSON.parse(fs.readFileSync(RAW_DATA_PATH, "utf8"));
-  const job = jobs.find((j) => j.id === 449800 || j.id === "449800");
+  // Read raw jobs
+  const rawData = fs.readFileSync("jobs.json", "utf8");
+  const jobs = JSON.parse(rawData);
+  const rawJob = jobs.find((j) => j.id == jobId);
 
-  if (job) {
-    console.log("Job ID:", job.id);
-    console.log("Title:", job.title);
-    console.log("Compensation Section:");
-    // Extract comp section roughly like main script
-    const combinedText =
-      (job.full_description || "") + " " + (job.application_info || "");
-    const compMatch = combinedText.match(
-      /Compensation\s*(?:and|&)?\s*Benefits?:?\s*([\s\S]*?)(?:\n\n|\n[A-Z][a-z]+:|Targeted Degrees|$)/i
-    );
-    if (compMatch) {
-      console.log("--- START COMP ---");
-      console.log(compMatch[1].trim());
-      console.log("--- END COMP ---");
-    } else {
-      console.log("No compensation section found via regex.");
-      console.log("Snippet of description looking for keywords:");
-      const idx = combinedText.toLowerCase().indexOf("compensation");
-      if (idx !== -1) {
-        console.log(combinedText.substring(idx, idx + 200));
-      }
-    }
-  } else {
-    console.log("Job 449800 not found.");
+  let output = "";
+  if (rawJob) {
+    output += "=== RAW JOB DATA ===\n";
+    output += "Title: " + rawJob.title + "\n";
+    output +=
+      "Comp & Benefits: " +
+      extractCompSection(
+        rawJob.full_description + " " + rawJob.application_info
+      ) +
+      "\n";
+    output += "\n--- Full Description Snippet ---\n";
+    output += rawJob.full_description.slice(0, 500) + "...\n";
   }
-} catch (e) {
-  console.error(e);
+
+  if (parsedJob) {
+    output += "\n=== PARSED JOB DATA ===\n";
+    output += "Salary: " + JSON.stringify(parsedJob.salary, null, 2) + "\n";
+  }
+
+  fs.writeFileSync("inspect_output.txt", output);
+  console.log("Output written to inspect_output.txt");
+} catch (error) {
+  fs.writeFileSync("inspect_output.txt", "Error: " + error.message);
+}
+
+function extractCompSection(text) {
+  if (!text) return "N/A";
+  const compMatch = text.match(
+    /Compensation\s*(?:and|&)?\s*Benefits?:?\s*([\s\S]*?)(?:\n\n|\n[A-Z][a-z]+:|Targeted Degrees|$)/i
+  );
+  if (compMatch) return compMatch[1].trim();
+  return "Could not extract specific Comp & Benefits section via regex";
 }
